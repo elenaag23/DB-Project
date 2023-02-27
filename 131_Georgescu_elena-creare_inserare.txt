@@ -1,0 +1,411 @@
+CREATE TABLE HOTEL 
+(
+ID_HOTEL           NUMBER(9)         PRIMARY KEY,
+ID_ANGAJAT         NUMBER(9)         NOT NULL REFERENCES ANGAJAT(ID_ANGAJAT),
+NUME               VARCHAR2(20)      NOT NULL,
+ADRESA             VARCHAR2(30)      NOT NULL,
+ORAS               VARCHAR2(20)      NOT NULL
+);
+
+CREATE TABLE CAMERA 
+(
+ID_CAMERA         NUMBER(9)       PRIMARY KEY,
+TIP_CAMERA        VARCHAR2(10)    NOT NULL,
+DISPONIBILITATE   CHAR(2)         CHECK (DISPONIBILITATE='DA' OR DISPONIBILITATE='NU') NOT NULL,
+PRET_NOAPTE       NUMBER(9)       NOT NULL
+);
+
+CREATE TABLE CLIENT 
+(
+ID_CLIENT         NUMBER(9)         PRIMARY KEY,
+NUME              VARCHAR2(15)      NOT NULL,
+PRENUME           VARCHAR2(15)      NOT NULL,
+DATA_NASTERII     DATE              NOT NULL,
+TELEFON           CHAR(10)          NOT NULL,
+ADRESA            VARCHAR2(30)      NOT NULL,
+ORAS              VARCHAR2(20)      NOT NULL
+);
+
+CREATE TABLE TIP_SEJUR
+(
+ID_SEJUR          NUMBER(9)        PRIMARY KEY,
+TIP_SEJUR         VARCHAR(15)      NOT NULL,
+PRET              NUMBER(9)        NOT NULL
+);
+
+CREATE TABLE FACTURA
+(
+ID_FACTURA        NUMBER(9)         PRIMARY KEY,
+DATA_EMITERE      DATE              NOT NULL,
+ID_PLATA          NUMBER(9)         NOT NULL REFERENCES PLATA(ID_PLATA) 
+);
+
+CREATE TABLE ANGAJAT
+(
+ID_ANGAJAT        NUMBER(9)        PRIMARY KEY,
+ID_JOB            NUMBER(9)        NOT NULL REFERENCES JOB(ID_JOB),
+NUME              VARCHAR2(15)     NOT NULL,
+PRENUME           VARCHAR2(15)     NOT NULL,
+DATA_NASTERII     DATE             NOT NULL,
+DATA_ANGAJARII    DATE             NOT NULL,
+TELEFON           CHAR(10)         NOT NULL,
+ORA_INCEPERE_PROGRAM CHAR(5)       NOT NULL,
+ORA_SFARSIT_PROGRAM  CHAR(5)       NOT NULL
+);
+
+CREATE TABLE JOB
+(
+ID_JOB        NUMBER(9)        PRIMARY KEY,
+NUME_JOB      VARCHAR2(15)     NOT NULL,
+SALARIU       NUMBER(9)        NOT NULL
+);
+
+CREATE TABLE DETINE
+(
+ID_HOTEL        NUMBER(9)       NOT NULL REFERENCES HOTEL(ID_HOTEL),
+ID_CAMERA       NUMBER(9)       NOT NULL REFERENCES CAMERA(ID_CAMERA),
+ID_APARTAMENT   NUMBER(9)       NOT NULL REFERENCES APARTAMENT(ID_APARTAMENT),
+CONSTRAINT PK_DETINE PRIMARY KEY(ID_HOTEL, ID_CAMERA, ID_APARTAMENT)
+);
+
+CREATE TABLE SERVICII_EXTRA
+(
+ID_SERV        NUMBER(9)       PRIMARY KEY,
+PRET           NUMBER(9)       NOT NULL
+);
+
+CREATE TABLE PISCINA
+(
+ID_SERV          NUMBER(9)       PRIMARY KEY REFERENCES SERVICII_EXTRA(ID_SERV),
+ORA_DESCHIDERE   CHAR(5)         NOT NULL,
+ORA_INCHIDERE    CHAR(5)         NOT NULL
+);
+
+CREATE TABLE SALA_SPORT
+(
+ID_SERV          NUMBER(9)       PRIMARY KEY REFERENCES SERVICII_EXTRA(ID_SERV),
+ORA_DESCHIDERE   CHAR(5)         NOT NULL,
+ORA_INCHIDERE    CHAR(5)         NOT NULL
+);
+
+CREATE TABLE EXCURSIE
+(
+ID_SERV          VARCHAR(9)      NOT NULL PRIMARY KEY REFERENCES SERVICII_EXTRA(ID_SERV),
+ID_ANGAJAT       VARCHAR(9)      NOT NULL REFERENCES ANGAJAT(ID_ANGAJAT),
+DESTINATIE       VARCHAR(20)     NOT NULL,
+ORA_PLECARE      CHAR(5)         NOT NULL,
+ORA_INTOARCERE   CHAR(5)         NOT NULL,
+DATA_EXC         DATE            NOT NULL
+);
+
+CREATE TABLE MIJLOC_TRANSPORT
+(
+ID_MIJL          NUMBER(9)      PRIMARY KEY,
+ID_SERV          NUMBER(9)      NOT NULL REFERENCES SERVICII_EXTRA(ID_SERV),
+ID_ANGAJAT       NUMBER(9)      NOT NULL REFERENCES ANGAJAT(ID_ANGAJAT),
+TIP_MIJLOC       VARCHAR2(15)   NOT NULL,
+NR_LOCURI        NUMBER(3)      NOT NULL
+);
+
+CREATE TABLE DISPUNE
+(
+ID_HOTEL        NUMBER(9)       NOT NULL REFERENCES HOTEL(ID_HOTEL),
+ID_SERV         NUMBER(9)       NOT NULL REFERENCES SERVICII_EXTRA(ID_SERV),
+CONSTRAINT PK_DISPUNE PRIMARY KEY(ID_HOTEL, ID_SERV)
+);
+
+CREATE TABLE FOLOSESTE
+(
+ID_MIJL        NUMBER(9)       NOT NULL REFERENCES MIJLOC_TRANSPORT(ID_MIJL),
+ID_SERV        NUMBER(9)       NOT NULL REFERENCES SERVICII_EXTRA(ID_SERV),
+CONSTRAINT PK_FOLOSESTE PRIMARY KEY(ID_MIJL, ID_SERV)
+);
+CREATE TABLE REZERVARE
+(
+ID_REZERVARE   NUMBER(9)      PRIMARY KEY,
+ID_CLIENT      NUMBER(9)      NOT NULL REFERENCES CLIENT(ID_CLIENT),
+ID_SEJUR       NUMBER(9)      NOT NULL REFERENCES TIP_SEJUR(ID_SEJUR),
+ID_CAMERA      NUMBER(9)      REFERENCES CAMERA(ID_CAMERA),
+ID_APARTAMENT  NUMBER(9)      REFERENCES APARTAMENT(ID_APARTAMENT),
+ID_FACTURA     NUMBER(9)      NOT NULL REFERENCES FACTURA(ID_FACTURA),
+DATA_REZERVARE DATE           NOT NULL,
+CHECK_IN       DATE           NOT NULL,
+CHECK_OUT      DATE           NOT NULL
+);
+
+CREATE TABLE CUPRINDE
+(
+ID_REZERVARE   NUMBER(9)       NOT NULL REFERENCES REZERVARE(ID_REZERVARE),
+ID_SERV        NUMBER(9)       NOT NULL REFERENCES SERVICII_EXTRA(ID_SERV),
+CONSTRAINT PK_CUPRINDE PRIMARY KEY(ID_REZERVARE, ID_SERV)
+);
+
+CREATE TABLE APARTAMENT 
+(
+ID_APARTAMENT       NUMBER(9)        PRIMARY KEY,
+NUMAR_CAMERE        NUMBER           CHECK(NUMAR_CAMERE>1 AND NUMAR_CAMERE<5) NOT NULL,
+DISPONIBILITATE     CHAR(2)          CHECK (DISPONIBILITATE='DA' OR DISPONIBILITATE='NU') NOT NULL,
+PRET_NOAPTE         NUMBER(9)        NOT NULL
+);
+
+CREATE TABLE PLATA
+(
+ID_PLATA          NUMBER(9)        PRIMARY KEY,
+VALOARE_PLATA     NUMBER(9)
+);
+
+
+INSERARI
+
+--JOB
+
+INSERT INTO JOB VALUES
+('19','2500','Receptionist');
+
+--ANGAJAT
+
+insert into angajat values
+(101,11,'Vasilica','Iacob','26-SEP-1984','18-JUL-2018','0771760402','08:00','20:00',1)
+
+insert into angajat values
+(102,11,'Fabian','Tudor','18-APR-1972','02-NOV-2016','0711760402','08:00','20:00',2)
+
+insert into angajat values
+(104,11,'Fane','Horia','01-MAY-1985','27-JUL-2015','0731760402','08:00','20:00',4)
+
+insert into angajat values
+(106,11,'Tiberiu','Emil','03-OCT-1975','27-FEB-2014','0751760402','20:00','08:00',1)
+
+insert into angajat values
+(107,11,'Dacian','Diana','04-MAY-1983','03-JUN-2014','0761760402','20:00','08:00',2)
+
+insert into angajat values
+(108,11,'Stan','Ciprian','15-MAR-1978','31-JUL-2013','0781760402','20:00','08:00',3)
+
+insert into angajat values
+(110,11,'Nicu','Elena','22-JUN-1977','21-JUL-2016','0700760402','20:00','08:00',5)
+
+insert into angajat values
+(111,12,'Ruxandra','Andrei','08-MAR-1978','03-OCT-2013','0701760402','07:00','11:00',1)
+
+insert into angajat values
+(112,12,'Lazar','Violeta','17-MAR-1982','07-JUL-2015','0702760402','07:00','11:00',2)
+
+insert into angajat values
+(114,12,'Alexandrina','Margareta','08-MAR-1984','27-NOV-2013','0704760402','07:00','11:00',4)
+
+insert into angajat values
+(115,12,'Romeo','Adam','29-NOV-1972','21-APR-2016','0705760402','07:00','11:00',5)
+
+insert into angajat values
+(116,12,'Miron','Cezar','09-MAY-1979','16-APR-2019','0706760402','12:00','16:00',1)
+
+insert into angajat values
+(117,12,'Matei','Laurentiu','05-APR-1974','08-MAY-2014','0707760402','12:00','16:00',2)
+
+insert into angajat values
+(118,12,'Olga','Nicoleta','08-JUN-1981','16-JAN-2013','0708760402','12:00','16:00',3)
+
+insert into angajat values
+(119,12,'Sandu','Valerian','06-JUL-1978','04-MAR-2016','0709760402','12:00','16:00',4)
+
+insert into angajat values
+(120,12,'Albert','Denis','04-JUN-1970','18-JAN-2017','0701060402','12:00','16:00',5)
+
+insert into angajat values
+(122,12,'Mitica','Daniela','28-JAN-1974','23-OCT-2013','0701260402','18:00','22:00',2)
+
+insert into angajat values
+(124,12,'Ghita','Alina','20-MAR-1979','04-SEP-2017','0701460402','18:00','22:00',4)
+
+insert into angajat values
+(125,12,'Marina','Aurica','24-OCT-1975','20-SEP-2019','0701560402','18:00','22:00',5)
+
+insert into angajat values
+(126,13,'Rodica','Dragos','11-DEC-1979','03-MAR-2014','0701660402','08:00','14:00',1)
+
+insert into angajat values
+(127,13,'Victoria','Tatiana','22-DEC-1977','20-JUN-2014','0701860402','08:00','14:00',2)
+
+insert into angajat values
+(128,13,'Mihai','Augustin','08-APR-1985','29-SEP-2016','0701960402','08:00','14:00',3)
+
+insert into angajat values
+(129,13,'Estera','Danut','01-AUG-1972','28-JUL-2014','0701200402','08:00','14:00',4)
+
+insert into angajat values
+(130,13,'Atanasie','Narcisa','17-JUN-1977','31-JUL-2018','0701201402','08:00','14:00',5)
+
+insert into angajat values
+(131,13,'Ivan','Marilena','20-AUG-1984','20-JUN-2014','0701211402','14:00','20:00',1)
+
+insert into angajat values
+(132,13,'George','Eliza','22-FEB-1979','12-JUL-2016','0701311402','14:00','20:00',2)
+
+insert into angajat values
+(133,13,'Octavian','Aurelia','30-AUG-1972','13-DEC-2019','0701411402','14:00','20:00',3)
+
+insert into angajat values
+(134,13,'Floriana','Victoria','07-SEP-1976','25-OCT-2016','0701511402','14:00','20:00',4)
+
+insert into angajat values
+(136,14,'Adam','Radu','19-JUL-1979','17-MAR-2015','0701711402','08:00','17:00',1)
+
+insert into angajat values
+(137,14,'Petre','Marius','16-JUN-1981','02-APR-2014','0701811402','08:00','17:00',2)
+
+insert into angajat values
+(138,14,'Petrut','David','11-JUL-1985','17-DEC-2014','0701911402','08:00','17:00',3)
+
+insert into angajat values
+(139,14,'Carol','Lorena','24-AUG-1970','10-APR-2018','0701205402','08:00','17:00',4)
+
+insert into angajat values
+(140,14,'Stan','Andrei','17-MAR-1982','29-SEP-2015','0701206402','08:00','17:00',5)
+
+insert into angajat values
+(142,15,'Sanda','Alin','30-NOV-1970','22-JUN-2015','0701208402','10:00','17:00',1)
+
+insert into angajat values
+(145,16,'Floriana','Antonia','24-DEC-1982','03-MAY-2016','0701209402','08:00','12:00',1)
+
+insert into angajat values
+(146,16,'Costin','Isabela','21-JUN-1979','10-AUG-2018','0701230402','08:00','12:00',2)
+
+insert into angajat values
+(147,16,'Valentin','Mihaela','07-APR-1983','17-OCT-2016','0701231402','08:00','12:00',3)
+
+insert into angajat values
+(148,16,'Marin','Albert','29-NOV-1977','10-JAN-2018','0701232402','08:00','12:00',4)
+
+insert into angajat values
+(149,16,'Octavian','Sorina','27-OCT-1970','07-FEB-2019','0701233402','08:00','12:00',5)
+
+insert into angajat values
+(150,16,'Traian','Emilia','01-MAY-1972','21-OCT-2014','0701234402','12:00','16:00',1)
+
+insert into angajat values
+(151,16,'Ghita','Claudia','30-JUN-1970','07-JAN-2016','0701234502','12:00','16:00',2)
+
+insert into angajat values
+(152,16,'Dumitran','Maria','15-MAR-1977','19-JUN-2017','0701235402','12:00','16:00',3)
+
+insert into angajat values
+(153,16,'Simon','Manuela','29-JUN-1973','08-JUL-2015','0701236402','12:00','16:00',4)
+
+insert into angajat values
+(154,16,'Iosif','Teodora','06-JUL-1982','06-JAN-2016','0701237402','12:00','16:00',5)
+
+insert into angajat values
+(155,16,'Timotei','Toma','07-MAY-1985','22-JUN-2017','0701238402','19:00','23:00',1)
+
+insert into angajat values
+(157,16,'Dionisie','Casandra','25-MAY-1982','04-JUL-2019','0701234002','19:00','23:00',3)
+
+insert into angajat values
+(160,17,'Oancea','Ileana','13-SEP-1985','15-JUL-2015','0701234302','08:00','17:00',1)
+
+insert into angajat values
+(161,17,'Damian','Denisa','18-AUG-1980','05-DEC-2019','0701234602','08:00','17:00',2)
+
+insert into angajat values
+(162,17,'Cristian','Marinela','11-AUG-1978','02-DEC-2015','0701234702','08:00','17:00',3)
+
+insert into angajat values
+(163,17,'Darius','Amalia','08-MAR-1972','20-JUN-2019','0701234802','08:00','17:00',4)
+
+insert into angajat values
+(164,17,'Apostol','Mariana','12-OCT-1984','17-AUG-2017','0701234902','08:00','17:00',5)
+
+insert into angajat values
+(165,17,'Gavrila','Sorina','27-NOV-1979','18-JAN-2013','0701234512','10:00','17:00',1)
+
+insert into angajat values
+(166,17,'Virgil','Cristina','10-DEC-1984','29-NOV-2019','0701234522','10:00','17:00',1)
+
+insert into angajat values
+(170,18,'Luca','Sofia','24-OCT-1978','15-SEP-2017','0701234532','09:00','17:00',1)
+
+insert into angajat values
+(171,18,'Daciana','Andreea','24-APR-1975','21-JUN-2019','0701234542','09:00','17:00',2)
+
+insert into angajat values
+(172,18,'Ionel','Ciprian','27-JUL-1973','05-NOV-2015','0701234552','09:00','17:00',3)
+
+insert into angajat values
+(173,18,'Martin','Dragos','17-JUL-1981','15-MAY-2015','0701234562','09:00','17:00',4)
+
+insert into angajat values
+(174,18,'Otilia','Luminita','25-FEB-1981','10-APR-2014','0701234572','09:00','17:00',5)
+
+insert into angajat values
+(174,18,'Otilia','Luminita','25-FEB-1981','10-APR-2014','0701234572','09:00','17:00',5)
+
+insert into angajat values
+(176,19,'Ioan','Emilia','24-APR-1984','19-AUG-2013','0701234592','08:00','15:00',2)
+
+insert into angajat values
+(177,19,'Stelian','Lenuta','06-JUN-1973','18-JAN-2017','0701234560','08:00','15:00',3)
+
+insert into angajat values
+(178,19,'Felix','Lavinia','04-AUG-1975','22-FEB-2018','0701234561','08:00','15:00',4)
+
+insert into angajat values
+(179,19,'Gheorghe','Teodor','04-JUN-1982','30-JAN-2013','0701234563','08:00','15:00',5)
+
+insert into angajat values
+(180,19,'Costin','Valeriu','06-DEC-1971','10-FEB-2016','0701234564','15:00','22:00',1)
+
+insert into angajat values
+(182,19,'Aurica','David','17-FEB-1976','19-MAR-2018','0701234566','15:00','22:00',3)
+
+insert into angajat values
+(183,19,'Cristian','Rozalia','04-MAY-1982','06-SEP-2019','0701234567','15:00','22:00',4)
+
+insert into angajat values
+(184,19,'Iancu','Emilian','15-JUN-1983','01-AUG-2019','0701234568','15:00','22:00',5)
+
+insert into angajat values
+(185,20,'Amalia','Sandra','10-SEP-1984','04-JUL-2014','0701234569','08:00','16:00',1)
+
+insert into angajat values
+(186,20,'Pompiliu','Mariana','17-MAY-1979','21-JUL-2016','0711234567','08:00','16:00',2)
+
+insert into angajat values
+(187,20,'Constantin','Iuliana','11-JUN-1973','10-APR-2018','0721234567','08:00','16:00',3)
+
+nsert into angajat values
+(190,20,'Dionisie','Steliana','19-MAR-1982','15-JAN-2015','0751234567','16:00','24:00',1)
+
+insert into angajat values
+(191,20,'Ilinca','Florentina','06-SEP-1976','28-JAN-2015','0761234567','16:00','24:00',2)
+
+insert into angajat values
+(192,20,'Andrada','Miruna','20-JAN-1970','04-JUL-2018','0771234567','16:00','24:00',3)
+
+insert into angajat values
+(193,20,'Costin','Dana','15-FEB-1977','09-APR-2019','0781234567','16:00','24:00',4)
+
+
+insert into plata values
+(110650,510);
+
+insert into factura values
+(1010650,'12-APR-2021',110650);
+
+INSERT INTO REZERVARE VALUES
+(10650,650,190,112,NULL,1010650,'27-FEB-2021','12-APR-2021','15-APR-2021');
+
+insert into plata values
+(110651,2220);
+
+insert into factura values
+(1010651,'10-MAY-2021',110651);
+
+INSERT INTO REZERVARE VALUES
+(10651,651,192,NULL,263,1010651,'10-MAY-2021','04-JUL-2021','08-JUL-2021');
+
+INSERT INTO CUPRINDE VALUES
+(10651,1212);
+
+

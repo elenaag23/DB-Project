@@ -1,0 +1,76 @@
+12.
+
+--1. Afisati numele, prenumele, data nasterii clientilor si orasul hotelului in care acesta a facut 
+--rezervarea, dar si perioada sejurului. Sa se afiseze cei nascuti dupa 1975, al caror nume de familie 
+--incepe cu 'A' si au rezervat o camera, iar ca serviciu extra au ales sala de sport.;
+
+select ccc.nume, ccc.prenume, ccc.data_nasterii, h.oras,r.check_in,r.check_out
+from camera cc, rezervare r, cuprinde c, client ccc, sala_sport s, hotel h
+where cc.id_camera=r.id_camera and r.id_rezervare=c.id_rezervare and r.id_client=ccc.id_client
+and c.id_serv=s.id_serv and to_char(ccc.data_nasterii,'YY')>'75' and upper(ccc.nume) like 'A%'
+and cc.id_hotel=h.id_hotel;
+
+--2. Afisati id-ul si orasul hotelului care are cei mai multi angajati cu salariul peste 2000 lei. 
+
+select h.id_hotel, h.oras, count(*)
+from hotel h, angajat a, job j
+where h.id_hotel=a.id_hotel and a.id_job=j.id_job and j.salariu>2000
+group by h.id_hotel,h.oras
+having count(*)=(select max(count(*))
+                 from hotel h, angajat a, job j
+                 where h.id_hotel=a.id_hotel and a.id_job=j.id_job and j.salariu>2000
+                 group by h.id_hotel);
+
+--3. Afisati numele, prenumele, ora_inceperii programului si conditia daca un angajat isi 
+--incepe programul dupa ora 18, pentru angajatii care au devenit parte din echipa hotelului
+--intr-o zi mai mare decat urmatoarea zi de vineri a datei curente.
+
+with LUCREAZA_DUPA_18 AS (select nume, prenume, ora_incepere_program, data_angajarii, case when 
+ to_number(substr(ora_incepere_program,1,2))>18 then 'Incepe dupa 18' else 'Nu incepe dupa 18' end as Program
+ from angajat)
+ 
+ select *
+ from lucreaza_dupa_18
+ where extract(DAY from data_angajarii)>extract(DAY from next_DAY(sysdate,'Friday'))
+ order by ora_incepere_program;
+
+ --4. Sa se afiseze, pentru fiecare client, daca a rezervat o camera sau un apartament. Se va respecta
+ -- formatul "nume_client prenume_client a rezervat un apartament/o camera".
+ 
+ select c.nume ||' '|| c.prenume || ' a rezervat' || 
+ decode(nvl(r.id_camera,0),0,' un apartament.',' o camera.')
+ from client c, rezervare r
+ where r.id_client=c.id_client;
+
+--5. Afisati numele si preturile tipurilor de sejururi cu pretul mai mare de 150 curpinse intr o
+--rezervare pentru o camera double, dintr o camera a hotelului din Sighisoara.
+
+select t.tip_sejur, t.pret
+from tip_sejur t
+where EXISTS (select r.id_sejur
+              from rezervare r, camera c, HOTEL H
+              where r.id_sejur=t.id_sejur and r.id_camera=c.id_camera and upper(c.tip_camera)='DOUBLE'
+              AND C.ID_HOTEL=H.ID_HOTEL AND H.ORAS='Sighisoara')
+AND T.PRET>150;
+
+13.
+--1.
+update tip_sejur
+set pret=pret+50
+where id_sejur in (select id_sejur
+                   from rezervare
+                   where to_char(data_rezervare,'DD')=25);
+--2.             
+update job
+set salariu=salariu-200
+where id_job in (select id_job
+                 from angajat
+                 where nume like 'A%');
+       
+--3.        
+update camera
+set pret_noapte=pret_noapte+100
+where id_hotel = (select id_hotel
+                  from hotel
+                  where oras='Timisoara');
+                  
