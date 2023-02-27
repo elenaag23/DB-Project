@@ -1,1 +1,1 @@
-# DB-Project
+Database project for the management of a hotel brand. One text file contains the script for creating the tables and inserts into them. The other one contains five complex exercises that contain: a join on 4 tables; a where clause; group by and having functions; a with clause; order by; string and date functions; nvl, decode and case functions; simple and correlated subqueries.  
